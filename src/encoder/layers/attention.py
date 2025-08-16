@@ -17,7 +17,7 @@ class MultiHeadAttention(nn.Module):
         self.query_proj = nn.Linear(hidden_size, hidden_size)
         self.key_value_proj = nn.Linear(hidden_size, num_kv_heads * head_dim * 2)
 
-        self.out_proj = nn.Linear(num_heads * hidden_size, hidden_size)
+        self.out_proj = nn.Linear(num_heads * head_dim, hidden_size)
         self.scale = head_dim ** -0.5
         self.dropout = nn.Dropout(drop)
         self.eager = eager
@@ -32,7 +32,7 @@ class MultiHeadAttention(nn.Module):
 
         query = self.query_proj(x).reshape(batch_size, seq_len, self.num_heads, self.head_dim)
         key_value = self.key_value_proj(x).reshape(batch_size, seq_len, self.num_kv_heads, self.head_dim * 2)
-        keys, values = key_value.split(2, dim = -1 )
+        keys, values = key_value.chunk(2, dim = -1 )
 
         query = query.permute(0, 2, 1, 3).contiguous()
         key = keys.permute(0, 2, 1, 3).contiguous()

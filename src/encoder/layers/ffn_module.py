@@ -11,9 +11,9 @@ class FeedForwardModule(nn.Module):
 
     def forward(self, x):
         residual = x
-        x = self.up_proj(x)
+        up = self.up_proj(x)
         gate = self.gate(x)
-        x = self.activation(x) * gate
+        x = self.activation(gate) * up
         x = self.down_proj(x)
         x += residual
         return x
