@@ -5,7 +5,7 @@ This is actively being worked on.
 ## Components
 
 ### Core (`src/core.py`)
-- **VectorQuantize**: Multi-layer vector quantization with Q seperate classification heads and quantization targets (following Assembly AI Universal 1 https://arxiv.org/html/2404.09841v2)
+- **VectorQuantize**: self-supervised targets with Q seperate classifers and quantizers (following Assembly AI Universal 1 https://arxiv.org/html/2404.09841v2)
 - **BaseTrainEngine**: Abstract training engine base class
 - **VectorTrainEngine**: BestRQ algorithm implementation for pretraining audio encoders (used in Google USM and Assembly AI Universal 1)
 - **mask_features**: Feature masking for self-supervised learning
@@ -17,7 +17,7 @@ This is actively being worked on.
 
 ### Encoders (`src/encoder/`)
 - **Conformer**: Convolution transformer
-- **WhisperEncoder**: Whisper's based audio encoder
+- **WhisperEncoder**: Whisper's audio encoder
 
 ### Decoders (`src/decoder/`)
 - **RVQ**: BestRQ implementation
