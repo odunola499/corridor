@@ -1,11 +1,11 @@
 # Audio Encoder Workbench
 
 A workbench for experimenting with audio encoders and their components.
-
+This is actively being worked on.
 ## Components
 
 ### Core (`src/core.py`)
-- **VectorQuantize**: Multi-layer vector quantization
+- **VectorQuantize**: Multi-layer vector quantization with Q seperate classification heads and quantization targets (following Assembly AI Universal 1 https://arxiv.org/html/2404.09841v2)
 - **BaseTrainEngine**: Abstract training engine base class
 - **VectorTrainEngine**: BestRQ algorithm implementation for pretraining audio encoders (used in Google USM and Assembly AI Universal 1)
 - **mask_features**: Feature masking for self-supervised learning
@@ -16,14 +16,15 @@ A workbench for experimenting with audio encoders and their components.
 - **RVQTrainConfig**: BestRQ algorithm configuration
 
 ### Encoders (`src/encoder/`)
-- **Conformer**: Convolution-augmented transformer
-- **WhisperEncoder**: Whisper-based audio encoder
-- Layer components: attention, FFN, convolution, specaugment
+- **Conformer**: Convolution transformer
+- **WhisperEncoder**: Whisper's based audio encoder
 
 ### Decoders (`src/decoder/`)
 - **RVQ**: BestRQ implementation
-- **Whisper Experimental RQ**: Experimental BestRQ-style continued pretraining with Whisper
+- **Whisper Experimental RQ**: Experimental BestRQ-style continued pretraining with Whisper's Encoder
 
 ### Feature Extractors
+- Work in Progress
 
 ### Text Tokenizers
+- Work in Progress
