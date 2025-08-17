@@ -99,7 +99,7 @@ class ResidualAttentionBlock(nn.Module):
         return x
 
 
-class AudioEncoder(nn.Module):
+class WhisperEncoder(nn.Module):
     def __init__(
         self, config:WhisperConfig
     ):
@@ -118,7 +118,8 @@ class AudioEncoder(nn.Module):
             [ResidualAttentionBlock(n_state, n_head) for _ in range(n_layer)]
         )
         self.ln_post = LayerNorm(n_state)
-        self.load_pretrained_weights(config.size)
+        if not config.size:
+            self.load_pretrained_weights(config.size)
         self.config = config
 
     def forward(self, x: Tensor):

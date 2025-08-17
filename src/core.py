@@ -2,6 +2,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from einops import rearrange
+from src.config import TrainConfig, RVQTrainConfig
+
 
 
 def mask_features(x, p_mask=0.03, n_span=10, sigma=0.1, subsample_factor=4):
@@ -83,26 +85,39 @@ class VectorQuantize(nn.Module):
 
 
 
-class VectorTrainEngine(nn.Module):
-    def __init__(self, Q, codebook_size, codebook_dim, hidden_size, encoder, vq_layers=1, subsample_factor=2):
+class BaseTrainEngine(nn.Module):
+    def __init__(self, train_config: TrainConfig, encoder):
         super().__init__()
-        self.Q = Q
+        self.train_config = train_config
+        self.encoder = encoder
+    
+    def forward(self, features):
+        raise NotImplementedError("Subclasses must implement forward method")
+
+
+class VectorTrainEngine(BaseTrainEngine):
+    def __init__(self, train_config: RVQTrainConfig, encoder):
+        super().__init__(train_config, encoder)
+        
+        self.q = train_config.Q
         self.input_dim = encoder.config.mel_bins
-        self.codebook_size = codebook_size
-        self.codebook_dim = codebook_dim
-        self.subsample_factor = subsample_factor
+        self.codebook_size = train_config.codebook_size
+        self.codebook_dim = train_config.codebook_dim
+        self.subsample_factor = encoder.config.subsample_factor
+
+        vq_layers = train_config.vq_layers
+
+        hidden_size = encoder.config.hidden_size
         
         self.quantizers = nn.ModuleList([
-            VectorQuantize(self.input_dim, codebook_size, codebook_dim, num_layers=vq_layers) for _ in range(Q)
+            VectorQuantize(self.input_dim, self.codebook_size, self.codebook_dim, num_layers=vq_layers) for _ in range(self.q)
         ])
         self.classifiers = nn.ModuleList([
-            nn.Linear(hidden_size, codebook_size) for _ in range(Q)
+            nn.Linear(hidden_size, self.codebook_size) for _ in range(self.q)
         ])
         
         self.quantizers.requires_grad_(False)
         self.classifiers.requires_grad_(True)
-        
-        self.encoder = encoder
     
     def forward(self, features):
         masked_features, mask, orig_mask, _ = mask_features(features, subsample_factor=self.encoder.config.subsample_factor)
@@ -124,10 +139,10 @@ class VectorTrainEngine(nn.Module):
             logit = classifier(hidden_states)
             logits.append(logit)
         
-        for i in range(self.Q):
+        for i in range(self.q):
             label = labels[i].view(-1)[mask]
             logit = logits[i].view(-1, self.codebook_size)[mask]
             loss += F.cross_entropy(logit, label, ignore_index=-1)
-        loss /= self.Q
+        loss /= self.q
         
         return loss

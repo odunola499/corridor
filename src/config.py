@@ -1,5 +1,4 @@
-import torch
-from torch import nn
+from typing import Optional
 from dataclasses import dataclass
 
 @dataclass
@@ -41,8 +40,18 @@ class WhisperConfig(AudioConfig):
     n_text_positions:int = 448
     num_text_heads:int = 6
     num_text_layers:int = 4
-    size:str = 'tiny'
+    size:Optional[str] = 'tiny'
     subsample_factor:int = 2
+
+
+@dataclass
+class RVQTrainConfig(TrainConfig):
+    encoder_config: AudioConfig
+    Q:int = 2
+    vq_layers:int = 2
+    codebook_size:int = 100
+    codebook_dim:int = 256
+
 
 
 

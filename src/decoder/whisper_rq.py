@@ -1,16 +1,19 @@
 import torch
 from src.core import VectorTrainEngine
-from src.encoder.whisper_encoder import WhisperConfig, AudioEncoder
+from src.encoder.whisper_encoder import WhisperConfig, WhisperEncoder
+from src.config import RVQTrainConfig
 
 if __name__ == "__main__":
     Q = 4
     codebook_size = 500
     codebook_dim = 384
     config = WhisperConfig()
-    encoder = AudioEncoder(config)
+    encoder = WhisperEncoder(config)
+    train_config = RVQTrainConfig(encoder_config=config,
+                                  vq_layers=1)
 
-    engine = VectorTrainEngine(Q, codebook_size, codebook_dim, config.hidden_size,
-                         encoder, vq_layers=1, subsample_factor=2)
+    engine = VectorTrainEngine(train_config = train_config,
+                                    encoder=encoder)
     features = torch.randn(2, encoder.config.mel_bins, 3000)
     loss = engine(features)
     print(loss)

@@ -1,6 +1,7 @@
 import torch
 from src.core import VectorTrainEngine, VectorQuantize, mask_features
 from src.encoder.conformer import ConformerConfig, Conformer
+from src.config import RVQTrainConfig
 
 
 if __name__ == "__main__":
@@ -17,9 +18,11 @@ if __name__ == "__main__":
     vq = VectorQuantize(input_dim, codebook_size, codebook_dim, num_layers=2)
     indices = vq(x)
     print(f"VQ indices shape: {indices.shape}")
+    train_config = RVQTrainConfig(encoder_config=config,
+                                  vq_layers = 2)
 
-    loss_engine = VectorTrainEngine(Q=2, codebook_size=codebook_size,
-                             codebook_dim=codebook_dim, hidden_size=hidden_size, encoder=encoder, vq_layers=2)
+    loss_engine = VectorTrainEngine(train_config = train_config,
+                                    encoder=encoder)
 
     x_masked, mask, orig_mask, masked_indices = mask_features(x)
     print(f"Masked input shape: {x_masked.shape}")
