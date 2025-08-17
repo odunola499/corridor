@@ -1,29 +1,13 @@
 from torch import nn
-from src.encoder.layers.attention import MHAModule
-from src.encoder.layers.ffn_module import FeedForwardModule
-from src.encoder.layers.convolution_module import ConvolutionModule
-from src.encoder.layers.subsample import Subsample
-from src.encoder.layers.specaugment import SpecAugment
+from src.module.layers.attention import MHAModule
+from src.module.layers.ffn_module import FeedForwardModule
+from src.module.layers.convolution_module import ConvolutionModule
+from src.module.layers.subsample import Subsample
+from src.module.layers.specaugment import SpecAugment
 
-from dataclasses import dataclass
 
+from src.config import ConformerConfig
 # Whatever attention choice is to be used for both training and inference (eager *args)
-
-@dataclass
-class ConformerConfig:
-    hidden_size: int
-    num_heads: int
-    num_kv_heads: int
-    expansion_factor: int = 4
-    kernel_size: int = 31
-    subsample: bool = False
-    subsample_factor: int = 4
-    dropout_rate: float = 0.1
-    use_specaugment: bool = False
-    specaugment_params: dict = None
-    eager_attn:bool = False
-    num_layers: int = 32
-    mel_bins:int = 128
 
 class ConformerBlock(nn.Module):
     def __init__(self, config:ConformerConfig):
@@ -45,11 +29,8 @@ class ConformerBlock(nn.Module):
         self.ffn2 = FeedForwardModule(config.hidden_size)
 
     def forward(self, x):
-        # No residual between blocks?
         x = self.ffn1(x)
-        print(f'FFN1 output shape: {x.shape}')
         x = self.attn(x)
-        print(f'Attention output shape: {x.shape}')
         x = self.conv(x)
         x = self.ffn2(x)
         return x
