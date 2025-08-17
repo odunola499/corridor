@@ -1,30 +1,13 @@
-import torch
 from torch import nn
-from src.encoder.attention import MHAModule
-from src.encoder.ffn_module import FeedForwardModule
-from src.encoder.convolution_module import ConvolutionModule
-from src.encoder.subsample import Subsample
-from src.encoder.specaugment import SpecAugment
+from src.module.layers.attention import MHAModule
+from src.module.layers.ffn_module import FeedForwardModule
+from src.module.layers.convolution_module import ConvolutionModule
+from src.module.layers.subsample import Subsample
+from src.module.layers.specaugment import SpecAugment
 
-from dataclasses import dataclass
 
+from src.config import ConformerConfig
 # Whatever attention choice is to be used for both training and inference (eager *args)
-
-@dataclass
-class ConformerConfig:
-    hidden_size: int
-    num_heads: int
-    num_kv_heads: int
-    expansion_factor: int = 4
-    kernel_size: int = 31
-    subsample: bool = False
-    subsample_factor: int = 4
-    dropout_rate: float = 0.1
-    use_specaugment: bool = False
-    specaugment_params: dict = None
-    eager_attn:bool = False
-    num_layers: int = 32
-    mel_bins:int = 128
 
 class ConformerBlock(nn.Module):
     def __init__(self, config:ConformerConfig):
@@ -42,12 +25,10 @@ class ConformerBlock(nn.Module):
         self.conv = ConvolutionModule(
             hidden_size=config.hidden_size,
             kernel_size=config.kernel_size,
-            expansion=config.expansion_factor
         )
         self.ffn2 = FeedForwardModule(config.hidden_size)
 
     def forward(self, x):
-        # No residual between blocks?
         x = self.ffn1(x)
         x = self.attn(x)
         x = self.conv(x)
@@ -59,7 +40,8 @@ class Conformer(nn.Module):
         super().__init__()
         self.config = config
         self.spec_augment = SpecAugment()
-        self.subsample = Subsample(hidden_size = config.hidden_size, dropout = config.dropout_rate)
+        self.subsample = Subsample(hidden_size = config.hidden_size, dropout = config.dropout_rate,
+                                   mel_bins = config.mel_bins, subsample_factor = config.subsample_factor)
 
         self.conformer_blocks = nn.ModuleList([
             ConformerBlock(config) for _ in range(config.num_layers)
