@@ -14,6 +14,22 @@ class DataConfig:
     pass
 
 @dataclass
+class FeatureExtractorConfig:
+    pass
+
+class NemoConfig(FeatureExtractorConfig):
+    sample_rate:int = 16000
+    normalize:bool = True
+    window_size:float = 0.025
+    window_stride:float = 0.01
+    window:str = 'hann'
+    features:int = 128 #mel bins
+    n_fft:int = 512
+    frame_splicing:int = 1
+    dither:float = 0.00001
+    pad_to:int = 0
+
+@dataclass
 class ConformerConfig(AudioConfig):
     hidden_size: int
     num_heads: int
