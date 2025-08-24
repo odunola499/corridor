@@ -1,13 +1,12 @@
-import torch
 import torchaudio.transforms
 from torch import nn
-from torchaudio.transforms import FrequencyMasking, TimeMasking
+import torch
 
 class SpecAugment(nn.Module):
-    def __init__(self, freq_mask_params = 15,
-                 time_mask_params = 70,
+    def __init__(self, freq_mask_params = 27,
+                 time_mask_params = 10,
                  num_freq_masks = 2,
-                 num_time_masks = 2):
+                 num_time_masks = 10):
         super().__init__()
         self.freq_masks = nn.ModuleList([
             torchaudio.transforms.FrequencyMasking(freq_mask_params) for i in range(num_freq_masks)
@@ -18,10 +17,11 @@ class SpecAugment(nn.Module):
 
     def forward(self, x):
         if self.training:
-            for mask in self.freq_masks:
-                x = mask(x)
+            with torch.autocast(x.device.type, enabled = False):
+                for mask in self.freq_masks:
+                    x = mask(x)
 
-            for mask in self.time_masks:
-                x = mask(x)
+                for mask in self.time_masks:
+                    x = mask(x)
 
         return x

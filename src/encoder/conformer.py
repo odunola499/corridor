@@ -1,5 +1,5 @@
 from torch import nn
-from src.module.layers.attention import MHAModule
+from src.module.attention.attention import MHAModule
 from src.module.layers.ffn_module import FeedForwardModule
 from src.module.layers.convolution_module import ConvolutionModule
 from src.module.layers.subsample import Subsample

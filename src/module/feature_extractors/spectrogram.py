@@ -3,7 +3,7 @@ from torch import nn, Tensor
 from dataclasses import dataclass
 import librosa
 import random
-from src.config import NemoConfig
+from src.config import NemoFeatureExtractorConfig
 
 
 def normalize_batch(x, seq_len):
@@ -29,7 +29,7 @@ def normalize_batch(x, seq_len):
 
 
 class FilterbankFeatures(nn.Module):
-    def __init__(self, config:NemoConfig):
+    def __init__(self, config:NemoFeatureExtractorConfig):
         super().__init__()
         self.log_zero_guard_type = "add"
         self.log_zero_guard_value = 2**-24
@@ -49,13 +49,14 @@ class FilterbankFeatures(nn.Module):
         self.dither = config.dither
         self.frame_splicing = config.frame_splicing
         self.nfilt = config.features #mel bins
+        print(self.nfilt)
         self.preemph = 0.97
         self.pad_to = config.pad_to
         highfreq = self.sample_rate / 2
 
         filterbanks = torch.tensor(
             librosa.filters.mel(
-                sr = self.sample_rate, n_fft = self.n_fft, fmin = 0, fmax = highfreq, norm = 'slaney'
+                sr = self.sample_rate, n_fft = self.n_fft, n_mels = config.features, fmin = 0, fmax = highfreq, norm = 'slaney'
             ), dtype = torch.float
         ).unsqueeze(0)
         self.register_buffer("fb", filterbanks)
@@ -148,7 +149,7 @@ class FilterbankFeatures(nn.Module):
 
 
 class AudioToMelSpectrogramPreprocessor(nn.Module):
-    def __init__(self, config:NemoConfig):
+    def __init__(self, config:NemoFeatureExtractorConfig):
         super().__init__()
         self.sample_rate = config.sample_rate
         self.n_window_size = int(config.window_size * self.sample_rate)
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     tensor = torch.randn(batch_size, 32000)
     seq_len = torch.tensor([32000] * batch_size, dtype = torch.long)
 
-    feature_extractor = FilterbankFeatures(NemoConfig())
+    feature_extractor = FilterbankFeatures(NemoFeatureExtractorConfig())
     output, seq_len = feature_extractor(tensor, seq_len)
     print(output.shape)
     print(seq_len.shape)

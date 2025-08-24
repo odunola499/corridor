@@ -17,13 +17,13 @@ class DataConfig:
 class FeatureExtractorConfig:
     pass
 
-class NemoConfig(FeatureExtractorConfig):
+class NemoFeatureExtractorConfig(FeatureExtractorConfig):
     sample_rate:int = 16000
     normalize:bool = True
     window_size:float = 0.025
     window_stride:float = 0.01
     window:str = 'hann'
-    features:int = 128 #mel bins
+    features:int = 80 #mel bins
     n_fft:int = 512
     frame_splicing:int = 1
     dither:float = 0.00001
@@ -43,7 +43,7 @@ class ConformerConfig(AudioConfig):
     specaugment_params: dict = None
     eager_attn:bool = False
     num_layers: int = 32
-    mel_bins:int = 128
+    mel_bins:int = 80
 
 @dataclass
 class WhisperConfig(AudioConfig):
@@ -67,6 +67,36 @@ class RVQTrainConfig(TrainConfig):
     vq_layers:int = 2
     codebook_size:int = 100
     codebook_dim:int = 256
+
+
+class NemoConformerConfig(AudioConfig):
+    feat_in:int = 80
+    feat_out:int = -1
+    n_layers:int = 17
+    d_model:int = 512
+
+    subsampling_factor:int = 8
+    subsampling_conv_channels:int = 256
+    causal_downsampling:bool = False
+
+    reduction_factor:int = 1
+
+    ff_expansion_factor:int = 4
+    self_attention_model:str = 'rel_pos'
+    n_heads:int = 8
+    att_context_size:list = [-1,-1]
+    att_context_style:str = 'regular'
+    xscaling:bool = True # attn scaling by sqt of d_model
+    untie_biases:bool = True
+    pos_emb_max_len:int = 5000
+
+    conv_kernel_size:int = 9
+    conv_norm_type:str = "batch_norm"
+
+    dropout_float = 0.1
+    dropout_pre_encoder:float = 0.
+    dropout_emb:int = 0.0
+    dropout_att:float = 0.1
 
 
 

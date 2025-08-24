@@ -18,3 +18,21 @@ class FeedForwardModule(nn.Module):
         x += residual
         return x
 
+class NemoFeedForwardModule(nn.Module):
+    def __init__(self, d_model, d_ff, dropout, activation = None):
+        super().__init__()
+        if activation is None:
+            self.activation = nn.SiLU()
+        self.d_model = d_model
+        self.d_ff = d_ff
+        self.use_bias = True
+        self.linear1 = nn.Linear(d_model, d_ff, bias =  self.use_bias)
+        self.dropout = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(d_ff, d_model, bias = self.use_bias)
+
+    def forward(self, x):
+        x = self.linear1(x)
+        x = self.activation(x)
+        x = self.dropout(x)
+        x = self.linear2(x)
+        return x
